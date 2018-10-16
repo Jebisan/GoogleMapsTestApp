@@ -1,7 +1,11 @@
 package rubenbaskaran.com.geofencingtestapp;
 
-import android.support.v4.app.FragmentActivity;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,6 +24,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        VerifyPermissions();
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -46,4 +51,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
+
+    //region Permissions
+    private void VerifyPermissions()
+    {
+        int locationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+
+        if (locationPermission != PackageManager.PERMISSION_GRANTED)
+        {
+            String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+            int callback_code = 123;
+            ActivityCompat.requestPermissions(this, permissions, callback_code);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 123)
+        {
+            for (int result : grantResults)
+            {
+                if (result != 0)
+                {
+                    finish();
+                }
+            }
+        }
+    }
+    //endregion
 }
