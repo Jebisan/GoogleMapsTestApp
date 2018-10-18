@@ -1,7 +1,9 @@
 package rubenbaskaran.com.geofencingtestapp;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -25,6 +27,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         VerifyPermissions();
+        GetLocation();
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -51,6 +54,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(sydney, 12.0f));
+    }
+
+    @SuppressLint("MissingPermission")
+    private void GetLocation()
+    {
+        MyLocationListener myLocationListener = new MyLocationListener(this);
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, myLocationListener);
     }
 
     //region Permissions
@@ -84,3 +95,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     //endregion
 }
+
