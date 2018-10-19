@@ -19,8 +19,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
-    private GoogleMap mMap;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -47,7 +45,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap)
     {
-        mMap = googleMap;
+        GoogleMap mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 
         LatLng hadsten = new LatLng(56.33, 10.05);
