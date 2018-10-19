@@ -3,19 +3,23 @@ package rubenbaskaran.com.geofencingtestapp;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
@@ -60,9 +64,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .snippet("My second home")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ruben_baskaran_billede_2)));
 
+        mMap.addCircle(new CircleOptions()
+                .center(hadsten)
+                .radius(2000)
+                .strokeColor(Color.RED)
+                .fillColor(Color.RED));
+
+        mMap.addPolyline(new PolylineOptions()
+                .add(hadsten, sydney)
+                .width(25)
+                .color(Color.BLUE)
+                .geodesic(false));
+
         // Move camera to Sydney
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(sydney, 12.0f));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(hadsten));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(hadsten, 12.0f));
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener()
+        {
+            @Override
+            public void onMapClick(LatLng latLng)
+            {
+                Toast.makeText(getApplicationContext(), "You clicked on lat: " + String.format("%.2f", latLng.latitude) + ", lng: " + String.format("%.2f", latLng.longitude), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     //region RequestLocationUpdates using LocationListener
