@@ -28,7 +28,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
     //region Properties
     GoogleMap googleMap;
-    Location location = null;
     //endregion
 
     @Override
@@ -107,69 +106,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocationListener locationListener = new LocationListener()
         {
             @Override
-            public void onLocationChanged(Location _location)
+            public void onLocationChanged(Location location)
             {
-                location = _location;
-                Log.e("Ruben - Location output", "Lng: " + String.valueOf(location.getLongitude()) + ", Lat: " + String.valueOf(location.getLatitude()));
+                Log.e("Location", "Lng: " + String.valueOf(location.getLongitude()) + ", Lat: " + String.valueOf(location.getLatitude()));
+
+                LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                googleMap.addMarker(new MarkerOptions().position(currentLocation).title("Me").snippet("My current location"));
+
+                Toast.makeText(getApplicationContext(), "Found current location", Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void onStatusChanged(String provider, int status, Bundle extras)
-            {
-                Log.e("Ruben - GPS", "Status changed");
-            }
+            public void onStatusChanged(String provider, int status, Bundle extras) { Log.e("GPS", "Status changed"); }
 
             @Override
             public void onProviderEnabled(String provider)
             {
-                Log.e("Ruben - GPS", "Enabled");
+                Log.e("GPS", "Enabled");
             }
 
             @Override
             public void onProviderDisabled(String provider)
             {
-                Log.e("Ruben - GPS", "Disabled");
+                Log.e("GPS", "Disabled");
             }
         };
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, locationListener);
-        SetMarkerThread setMarkerThread = new SetMarkerThread();
-        setMarkerThread.start();
-    }
-
-    class SetMarkerThread extends Thread
-    {
-        public void run()
-        {
-            while (true)
-            {
-                runOnUiThread(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        //googleMap.clear();
-                        if (location != null)
-                        {
-                            LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                            googleMap.addMarker(new MarkerOptions().position(currentLocation)
-                                    .title("Me")
-                                    .snippet("My current location"));
-                            Toast.makeText(getApplicationContext(), "Found current location", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
-                try
-                {
-                    Thread.sleep(5000);
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
     //endregion
 
