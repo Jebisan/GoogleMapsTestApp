@@ -4,11 +4,14 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -25,6 +28,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
     //region Properties
     GoogleMap googleMap;
+    Location location = null;
     //endregion
 
     @Override
@@ -54,13 +58,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         googleMap = _googleMap;
         googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 
-        LatLng copenhagen = new LatLng(55.67,12.52);
+        LatLng copenhagen = new LatLng(55.67, 12.52);
         googleMap.addMarker(new MarkerOptions().position(copenhagen)
                 .title("Marker in Copenhagen")
                 .snippet("Capital of Denmark")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ruben_baskaran_billede_1)));
 
-        LatLng sydney = new LatLng(-33.84,150.65);
+        LatLng sydney = new LatLng(-33.84, 150.65);
         googleMap.addMarker(new MarkerOptions().position(sydney)
                 .title("Marker in Sydney")
                 .snippet("Biggest city in Australia")
@@ -98,10 +102,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @SuppressLint("MissingPermission")
     private void GetAndShowMyLocation()
     {
-        MyLocationListener myLocationListener = new MyLocationListener();
-        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, myLocationListener);
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
+        LocationListener locationListener = new LocationListener()
+        {
+            @Override
+            public void onLocationChanged(Location _location)
+            {
+                location = _location;
+                Log.e("Ruben - Location output", "Lng: " + String.valueOf(location.getLongitude()) + ", Lat: " + String.valueOf(location.getLatitude()));
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras)
+            {
+                Log.e("Ruben - GPS", "Status changed");
+            }
+
+            @Override
+            public void onProviderEnabled(String provider)
+            {
+                Log.e("Ruben - GPS", "Enabled");
+            }
+
+            @Override
+            public void onProviderDisabled(String provider)
+            {
+                Log.e("Ruben - GPS", "Disabled");
+            }
+        };
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, locationListener);
         SetMarkerThread setMarkerThread = new SetMarkerThread();
         setMarkerThread.start();
     }
@@ -118,9 +149,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void run()
                     {
                         //googleMap.clear();
-                        if (MyLocationListener.location != null)
+                        if (location != null)
                         {
-                            LatLng currentLocation = new LatLng(MyLocationListener.location.getLatitude(), MyLocationListener.location.getLongitude());
+                            LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
                             googleMap.addMarker(new MarkerOptions().position(currentLocation)
                                     .title("Me")
                                     .snippet("My current location"));
