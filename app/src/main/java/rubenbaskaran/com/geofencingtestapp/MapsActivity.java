@@ -23,14 +23,16 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
+    //region Properties
+    GoogleMap googleMap;
+    //endregion
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         VerifyPermissions();
-
-        //GetLocation();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -47,40 +49,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(GoogleMap googleMap)
+    public void onMapReady(GoogleMap _googleMap)
     {
-        GoogleMap mMap = googleMap;
-        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        googleMap = _googleMap;
+        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 
-        LatLng hadsten = new LatLng(56.33, 10.05);
-        mMap.addMarker(new MarkerOptions().position(hadsten)
-                .title("Marker in Hadsten")
-                .snippet("My first home")
+        LatLng copenhagen = new LatLng(55.67,12.52);
+        googleMap.addMarker(new MarkerOptions().position(copenhagen)
+                .title("Marker in Copenhagen")
+                .snippet("Capital of Denmark")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ruben_baskaran_billede_1)));
 
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney)
+        LatLng sydney = new LatLng(-33.84,150.65);
+        googleMap.addMarker(new MarkerOptions().position(sydney)
                 .title("Marker in Sydney")
-                .snippet("My second home")
+                .snippet("Biggest city in Australia")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ruben_baskaran_billede_2)));
 
-        mMap.addCircle(new CircleOptions()
-                .center(hadsten)
+        googleMap.addCircle(new CircleOptions()
+                .center(copenhagen)
                 .radius(2000)
                 .strokeColor(Color.RED)
                 .fillColor(Color.RED));
 
-        mMap.addPolyline(new PolylineOptions()
-                .add(hadsten, sydney)
+        googleMap.addPolyline(new PolylineOptions()
+                .add(copenhagen, sydney)
                 .width(25)
                 .color(Color.BLUE)
                 .geodesic(false));
 
         // Move camera to Sydney
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(hadsten));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(hadsten, 12.0f));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(copenhagen));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(copenhagen, 12.0f));
 
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener()
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener()
         {
             @Override
             public void onMapClick(LatLng latLng)
@@ -88,15 +90,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Toast.makeText(getApplicationContext(), "You clicked on lat: " + String.format("%.2f", latLng.latitude) + ", lng: " + String.format("%.2f", latLng.longitude), Toast.LENGTH_SHORT).show();
             }
         });
+
+        GetAndShowMyLocation();
     }
 
-    //region RequestLocationUpdates using LocationListener
+    //region GetAndShowMyLocation using LocationListener
     @SuppressLint("MissingPermission")
-    private void GetLocation()
+    private void GetAndShowMyLocation()
     {
-        MyLocationListener myLocationListener = new MyLocationListener(this);
+        MyLocationListener myLocationListener = new MyLocationListener();
         LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
         lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, myLocationListener);
+
+        SetMarkerThread setMarkerThread = new SetMarkerThread();
+        setMarkerThread.start();
+    }
+
+    class SetMarkerThread extends Thread
+    {
+        public void run()
+        {
+            while (true)
+            {
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        //googleMap.clear();
+                        if (MyLocationListener.location != null)
+                        {
+                            LatLng currentLocation = new LatLng(MyLocationListener.location.getLatitude(), MyLocationListener.location.getLongitude());
+                            googleMap.addMarker(new MarkerOptions().position(currentLocation)
+                                    .title("Me")
+                                    .snippet("My current location"));
+                            Toast.makeText(getApplicationContext(), "Found current location", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                try
+                {
+                    Thread.sleep(5000);
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
     //endregion
 

@@ -1,6 +1,5 @@
 package rubenbaskaran.com.geofencingtestapp;
 
-import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
@@ -8,17 +7,15 @@ import android.util.Log;
 
 public class MyLocationListener implements LocationListener
 {
-    private Context context;
-
-    public MyLocationListener(Context context)
-    {
-        this.context = context;
-    }
+    //region Properties
+    public static Location location;
+    //endregion
 
     @Override
-    public void onLocationChanged(Location location)
+    public void onLocationChanged(Location _location)
     {
-        Log.e("Ruben - Location output", "Log: " + String.valueOf(location.getLongitude()) + ", Lat: " + String.valueOf(location.getLatitude()));
+        location = _location;
+        Log.e("Ruben - Location output", "Lng: " + String.valueOf(location.getLongitude()) + ", Lat: " + String.valueOf(location.getLatitude()));
     }
 
     @Override
