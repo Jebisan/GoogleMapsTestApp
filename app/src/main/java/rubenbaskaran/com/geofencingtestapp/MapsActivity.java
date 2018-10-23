@@ -36,11 +36,52 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         VerifyPermissions();
+    }
 
+    private void StartApplication()
+    {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
+
+    //region Permissions
+    private void VerifyPermissions()
+    {
+        int locationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+
+        if (locationPermission != PackageManager.PERMISSION_GRANTED)
+        {
+            String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+            int callback_code = 123;
+            ActivityCompat.requestPermissions(this, permissions, callback_code);
+        }
+        else
+        {
+            StartApplication();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 123)
+        {
+            for (int result : grantResults)
+            {
+                if (result != 0)
+                {
+                    finish();
+                    return;
+                }
+            }
+
+            StartApplication();
+        }
+    }
+    //endregion
 
     /**
      * Manipulates the map once available.
@@ -118,7 +159,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) { Log.e("GPS", "Status changed"); }
+            public void onStatusChanged(String provider, int status, Bundle extras)
+            {
+                Log.e("GPS", "Status changed");
+            }
 
             @Override
             public void onProviderEnabled(String provider)
@@ -133,39 +177,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         };
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, locationListener);
-    }
-    //endregion
-
-    //region Permissions
-    private void VerifyPermissions()
-    {
-        int locationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-
-        if (locationPermission != PackageManager.PERMISSION_GRANTED)
-        {
-            String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-            int callback_code = 123;
-            ActivityCompat.requestPermissions(this, permissions, callback_code);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-    {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == 123)
-        {
-            for (int result : grantResults)
-            {
-                if (result != 0)
-                {
-                    finish();
-                }
-            }
-        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
     }
     //endregion
 }
-
