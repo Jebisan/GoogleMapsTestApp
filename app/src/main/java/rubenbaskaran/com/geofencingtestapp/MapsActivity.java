@@ -65,6 +65,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         else
         {
+            // If we already got the permission then start the application
             StartApplication();
         }
     }
@@ -85,6 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
 
+            // If permission is granted then start the application
             StartApplication();
         }
     }
@@ -127,10 +129,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .color(Color.BLUE)
                 .geodesic(false));
 
-        // Move camera to Sydney
+        // Move camera to Copenhagen
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(copenhagen));
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(copenhagen, 12.0f));
 
+        // OnClickListener for showing toast message with location data when user presses somewhere on the map
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener()
         {
             @Override
@@ -146,6 +149,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //region GPS implementation
     protected void AddMarkerOnMyLocation()
     {
+        // This callback method will be called once every second
         locationCallback = new LocationCallback()
         {
             @Override
@@ -157,12 +161,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 for (Location location : locationResult.getLocations())
                 {
-                    //googleMap.clear();
+                    // Use googleMap.clear() for removing the previous marker before adding the new one
+                    // googleMap.clear();
+
                     Log.e("Location", "Lng: " + String.valueOf(location.getLongitude()) + ", Lat: " + String.valueOf(location.getLatitude()));
 
                     LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
                     googleMap.addMarker(new MarkerOptions().position(currentLocation).title("Me").snippet("My current location"));
 
+                    // Remove this line in the final app. Only for debugging
                     Toast.makeText(getApplicationContext(), "Found current location", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -177,6 +184,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SettingsClient client = LocationServices.getSettingsClient(this);
         Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
 
+        // If GPS is enabled then do this
         task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>()
         {
             @Override
@@ -188,6 +196,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        // If GPS is disabled then do this
         task.addOnFailureListener(this, new OnFailureListener()
         {
             @Override
@@ -197,41 +206,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 finish();
             }
         });
-    }
-    //endregion
-
-    //region Helper methods
-    @SuppressLint("MissingPermission")
-    private void CreateGpsStatusListener()
-    {
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        LocationListener GpsStatusListener = new LocationListener()
-        {
-            @Override
-            public void onLocationChanged(Location location)
-            {
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras)
-            {
-            }
-
-            @Override
-            public void onProviderEnabled(String provider)
-            {
-                Toast.makeText(getApplicationContext(), "GPS Enabled", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onProviderDisabled(String provider)
-            {
-                Toast.makeText(getApplicationContext(), "GPS Disabled", Toast.LENGTH_SHORT).show();
-            }
-        };
-
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3600000, 100000, GpsStatusListener);
     }
     //endregion
 }
